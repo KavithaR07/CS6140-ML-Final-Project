@@ -37,13 +37,15 @@ Each observation will represent an individual company on a specific trading day,
 ### Kavitha
 - GitHub repository management and organization.
 - Data collection support.
-- Initial feature engineering.
-- GMM market-regime clustering.
+- Data Preprocessing and validation
+- Exploratory Data Analysis
 - Random Forest implementation.
 - AdaBoost implementation.
 
 ### Julian
 - Data collection and integration.
+- Feature engineering.
+- GMM market-regime clustering.
 - Financial reporting schema alignment.
 - Ridge Regression implementation.
 
