@@ -15,6 +15,31 @@ python src/download_data.py
 - SEC files are a snapshot of everything filed up to the download day (last run 2026-11-15). A rerun will pick up newer filings, so cleaning should drop anything filed after 2026-10-31. Berkshire's Q3 2026 10-Q (filed 2026-11-09) is already in there.
 - SEC asks scripts to identify themselves. Set `SEC_USER_AGENT` to your name and email before running. In PowerShell: `$env:SEC_USER_AGENT = "Your Name you@example.com"`
 
+## Running the pipeline
+
+From the repo root, in this order:
+
+```
+python src/download_data.py          # raw data (already in data/raw/, only rerun to refresh it)
+python src/build_modeling_table.py   # -> data/processed/modeling/<TICKER>.csv
+python src/eda_modeling_table.py     # EDA charts -> results/figures/modeling_*.png
+python src/feature_overlap_chart.py  # feature overlap charts -> results/figures/feature_overlap_*.png
+python src/ridge_baseline.py         # Ridge walk-forward -> results/ridge_baseline_*.csv
+```
+
+Needs pandas, numpy, matplotlib and scikit-learn (all in `requirements.txt`). The Ridge run takes about half a minute. `results/ridge_baseline_predictions.csv` (every test-day prediction, about 10 MB) isn't committed; the last step recreates it.
+
+### `processed/modeling/`
+
+One table per stock, one row per trading day. Berkshire and Pepsi start 2008-01-02 and Tesla 2010-06-29, so the 63-day lookbacks have history before modeling starts; all end 2026-10-30.
+
+- `open, high, low, close, adj_close, volume`, plus dividend-adjusted `adj_open, adj_high, adj_low` (open/high/low scaled by `adj_close / close`)
+- `sp500_close`
+- the 10 FRED series as known at that day's close. Each value only appears once it was released: VIX the same day, daily rates and the Baa spread the next day, oil 2 days, jobless claims 5, the dollar index 7.
+- labels: `ret_next` (next trading day's close-to-close return), `up_next` (1 if it went up), `ret_next_open_to_close` (side label)
+
+Features are built from these tables by `src/features.py`. Its catalog is the source of truth for every feature's group (what it captures) and role (in the pool, held out as a near-duplicate, or a new candidate).
+
 ## What's in `raw/`
 
 ```
